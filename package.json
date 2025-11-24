@@ -1,0 +1,27 @@
+{
+  "name": "trilium_mcp",
+  "version": "1.0.0+251124_HJPLUS.DESIGN",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://192.168.0.125:3004/HJPLUS/Trilium_MCP.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "@types/node": "^24.10.1",
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "typescript": "^5.9.3",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
+  }
+}
