@@ -1,6 +1,6 @@
 {
   "name": "trilium_mcp",
-  "version": "1.0.0+251124_HJPLUS.DESIGN",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "type": "module",

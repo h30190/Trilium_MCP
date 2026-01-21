@@ -1,4 +1,4 @@
-# Trilium MCP Server
+# Trilium MCP Server `v1.0.1`
 
 [English](#english) | [繁體中文](#traditional-chinese)
 
@@ -19,7 +19,8 @@ This is a Model Context Protocol (MCP) Server designed for [Trilium Notes](https
 ### Features
 
 - **Search Notes (`search_notes`)**: Search notes by keywords.
-- **Read Note (`read_note`)**: Read note content and metadata.
+- **Read Note (`read_note`)**: Read note content and basic metadata (optimized for large notes).
+- **Get Note Metadata (`get_note_metadata`)**: Get full note metadata including attributes, labels, and relations.
 - **Create Note (`create_note`)**: Create new notes (supports text, code, etc.).
 - **Update Note (`update_note`)**: Modify existing note content or attributes.
 - **Move Note (`move_note`)**: Move notes to a new parent.
@@ -121,7 +122,8 @@ For more digital transformation consulting and service details, please contact u
 ### 功能
 
 - **搜尋筆記 (`search_notes`)**: 透過關鍵字搜尋筆記。
-- **讀取筆記 (`read_note`)**: 讀取筆記的內容與屬性 (Metadata)。
+- **讀取筆記 (`read_note`)**: 讀取筆記的內容與基礎屬性（針對大型筆記進行了優化）。
+- **獲取筆記元數據 (`get_note_metadata`)**: 獲取完整的筆記屬性、標籤與關聯資訊。
 - **建立筆記 (`create_note`)**: 建立新的筆記 (支援文字、程式碼等各種類型)。
 - **更新筆記 (`update_note`)**: 修改現有筆記的內容或屬性。
 - **移動筆記 (`move_note`)**: 將筆記移動到新的父節點下。

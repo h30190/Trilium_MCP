@@ -30,7 +30,7 @@ const trilium = new TriliumClient(TRILIUM_ETAPI_URL, TRILIUM_ETAPI_TOKEN);
 const server = new Server(
     {
         name: "trilium-mcp",
-        version: "V1.0.0(251124_HJPLUS.DESIGN)",
+        version: "1.0.1",
     },
     {
         capabilities: {
@@ -142,7 +142,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
                 const { noteId } = readNoteSchema.parse(args);
                 const note = await trilium.getNote(noteId);
                 const content = await trilium.getNoteContent(noteId);
-                
+
                 // Return only basic metadata and content to avoid context bloat
                 const basicMetadata = {
                     noteId: note.noteId,
