@@ -33,6 +33,9 @@ const searchNotesSchema = z.object({
 const readNoteSchema = z.object({
     noteId: z.string().describe("The ID of the note to read"),
 });
+const getNoteMetadataSchema = z.object({
+    noteId: z.string().describe("The ID of the note to get metadata for"),
+});
 const createNoteSchema = z.object({
     parentNoteId: z.string().describe("The ID of the parent note"),
     title: z.string().describe("The title of the new note"),
@@ -70,8 +73,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             {
                 name: "read_note",
-                description: "Read a note's metadata and content",
+                description: "Read a note's content and basic metadata",
                 inputSchema: zodToJsonSchema(readNoteSchema),
+            },
+            {
+                name: "get_note_metadata",
+                description: "Get a note's full metadata including attributes",
+                inputSchema: zodToJsonSchema(getNoteMetadataSchema),
             },
             {
                 name: "create_note",
@@ -111,10 +119,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 const { noteId } = readNoteSchema.parse(args);
                 const note = await trilium.getNote(noteId);
                 const content = await trilium.getNoteContent(noteId);
+                // Return only basic metadata and content to avoid context bloat
+                const basicMetadata = {
+                    noteId: note.noteId,
+                    title: note.title,
+                    type: note.type,
+                    mime: note.mime,
+                    dateModified: note.dateModified,
+                    dateCreated: note.dateCreated
+                };
                 return {
                     content: [
-                        { type: "text", text: `Metadata:\n${JSON.stringify(note, null, 2)}\n\nContent:\n${content}` },
+                        { type: "text", text: `Metadata (Basic):\n${JSON.stringify(basicMetadata, null, 2)}\n\nContent:\n${content}` },
                     ],
+                };
+            }
+            case "get_note_metadata": {
+                const { noteId } = getNoteMetadataSchema.parse(args);
+                const note = await trilium.getNote(noteId);
+                return {
+                    content: [{ type: "text", text: JSON.stringify(note, null, 2) }],
                 };
             }
             case "create_note": {
