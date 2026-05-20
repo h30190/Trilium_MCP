@@ -74,6 +74,10 @@ const moveNoteSchema = z.object({
     parentNoteId: z.string().describe("The ID of the new parent note"),
 });
 
+const listChildrenSchema = z.object({
+    noteId: z.string().describe("The ID of the parent note"),
+});
+
 const manageAttributesSchema = z.object({
     action: z.enum(["create", "update", "delete"]).describe("The action to perform"),
     noteId: z.string().optional().describe("The ID of the note (required for create)"),
@@ -116,6 +120,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 name: "move_note",
                 description: "Move a note to a new parent",
                 inputSchema: zodToJsonSchema(moveNoteSchema as any),
+            },
+            {
+                name: "list_children",
+                description: "List all direct child notes of a given parent note (like 'ls' for a folder)",
+                inputSchema: zodToJsonSchema(listChildrenSchema as any),
             },
             {
                 name: "manage_attributes",
@@ -190,6 +199,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
                 const note = await trilium.moveNote(noteId, parentNoteId);
                 return {
                     content: [{ type: "text", text: JSON.stringify(note, null, 2) }],
+                };
+            }
+
+            case "list_children": {
+                const { noteId } = listChildrenSchema.parse(args);
+                const result = await trilium.listChildren(noteId);
+                return {
+                    content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
                 };
             }
 

@@ -43,3 +43,14 @@ export interface UpdateNoteParams {
     mime?: string;
     content?: string;
 }
+
+export interface ChildNote {
+    noteId: string;
+    title: string;
+    type: string;
+}
+
+export interface ListChildrenResult {
+    parentNoteId: string;
+    children: ChildNote[];
+}

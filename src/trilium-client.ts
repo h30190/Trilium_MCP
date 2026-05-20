@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { Note, NoteContent, CreateNoteParams, UpdateNoteParams, Attribute, SearchResult } from './types.js';
+import { Note, NoteContent, CreateNoteParams, UpdateNoteParams, Attribute, SearchResult, ListChildrenResult, ChildNote } from './types.js';
 
 export class TriliumClient {
     private client: AxiosInstance;
@@ -31,6 +31,29 @@ export class TriliumClient {
             responseType: 'text',
         });
         return response.data;
+    }
+
+    async listChildren(parentNoteId: string): Promise<ListChildrenResult> {
+        // Get parent note to find childNoteIds
+        const parent = await this.getNote(parentNoteId);
+        const childIds = parent.childNoteIds ?? [];
+
+        if (childIds.length === 0) {
+            return { parentNoteId, children: [] };
+        }
+
+        // Fetch each child's basic info in parallel
+        const childrenPromises = childIds.map(async (id) => {
+            const child = await this.client.get<Note>(`/notes/${id}`);
+            return {
+                noteId: child.data.noteId,
+                title: child.data.title,
+                type: child.data.type,
+            } as ChildNote;
+        });
+
+        const children = await Promise.all(childrenPromises);
+        return { parentNoteId, children };
     }
 
     async createNote(params: CreateNoteParams): Promise<Note> {
