@@ -4,9 +4,10 @@ import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
+import { z, ZodError } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import dotenv from "dotenv";
+import axios from "axios";
 import { TriliumClient } from "./trilium-client.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -221,13 +222,49 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
                 throw new Error(`Unknown tool: ${name}`);
         }
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = formatError(error);
         return {
-            content: [{ type: "text", text: `Error: ${errorMessage}` }],
+            content: [{ type: "text", text: errorMessage }],
             isError: true,
         };
     }
 });
+
+function formatError(error: unknown): string {
+    // Zod validation error
+    if (error instanceof ZodError) {
+        const issues = error.issues.map((iss) => `  - ${iss.path.join(".")}: ${iss.message}`).join("\n");
+        return `Validation Error:\n${issues}`;
+    }
+
+    // Axios error (ETAPI 4xx/5xx or network error)
+    if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const data = error.response?.data;
+
+        if (status) {
+            // Try to extract a human-readable message from ETAPI response
+            const detail = typeof data === "object" && data !== null
+                ? JSON.stringify(data, null, 2)
+                : String(data ?? "");
+            return `ETAPI Error (${status}):\n${detail}`;
+        }
+
+        // Network / connectivity error (no response)
+        if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
+            return `Connection Error: Cannot reach Trilium at ${error.config?.baseURL}. Is the server running?`;
+        }
+
+        return `Network Error (${error.code}): ${error.message}`;
+    }
+
+    // Application-level Error (e.g., missing params in manage_attributes)
+    if (error instanceof Error) {
+        return `Error: ${error.message}`;
+    }
+
+    return `Error: ${String(error)}`;
+}
 
 async function main() {
     const transport = new StdioServerTransport();
