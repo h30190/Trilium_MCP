@@ -78,6 +78,10 @@ const listChildrenSchema = z.object({
     noteId: z.string().describe("The ID of the parent note"),
 });
 
+const deleteNoteSchema = z.object({
+    noteId: z.string().describe("The ID of the note to delete"),
+});
+
 const manageAttributesSchema = z.object({
     action: z.enum(["create", "update", "delete"]).describe("The action to perform"),
     noteId: z.string().optional().describe("The ID of the note (required for create)"),
@@ -125,6 +129,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 name: "list_children",
                 description: "List all direct child notes of a given parent note (like 'ls' for a folder)",
                 inputSchema: zodToJsonSchema(listChildrenSchema as any),
+            },
+            {
+                name: "delete_note",
+                description: "Delete a note and all its children. This action is irreversible.",
+                inputSchema: zodToJsonSchema(deleteNoteSchema as any),
             },
             {
                 name: "manage_attributes",
@@ -208,6 +217,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
                 return {
                     content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
                 };
+            }
+
+            case "delete_note": {
+                const { noteId } = deleteNoteSchema.parse(args);
+                await trilium.deleteNote(noteId);
+                return { content: [{ type: "text", text: `Note ${noteId} deleted successfully` }] };
             }
 
             case "manage_attributes": {

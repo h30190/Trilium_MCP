@@ -114,4 +114,8 @@ export class TriliumClient {
     async deleteAttribute(attributeId: string): Promise<void> {
         await this.client.delete(`/attributes/${attributeId}`);
     }
+
+    async deleteNote(noteId: string): Promise<void> {
+        await this.client.delete(`/notes/${noteId}`);
+    }
 }
