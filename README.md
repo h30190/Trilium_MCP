@@ -1,4 +1,4 @@
-# Trilium MCP Server `v1.0.1`
+# Trilium MCP Server `v1.1.0`
 
 [English](#english) | [繁體中文](#traditional-chinese)
 
@@ -24,6 +24,8 @@ This is a Model Context Protocol (MCP) Server designed for [Trilium Notes](https
 - **Create Note (`create_note`)**: Create new notes (supports text, code, etc.).
 - **Update Note (`update_note`)**: Modify existing note content or attributes.
 - **Move Note (`move_note`)**: Move notes to a new parent.
+- **List Children (`list_children`)**: List all direct child notes of a parent note.
+- **Delete Note (`delete_note`)**: Delete a note and all its children (**irreversible**).
 - **Manage Attributes (`manage_attributes`)**: Add, modify, or delete note attributes.
 
 ### Installation & Setup
@@ -127,6 +129,8 @@ For more digital transformation consulting and service details, please contact u
 - **建立筆記 (`create_note`)**: 建立新的筆記 (支援文字、程式碼等各種類型)。
 - **更新筆記 (`update_note`)**: 修改現有筆記的內容或屬性。
 - **移動筆記 (`move_note`)**: 將筆記移動到新的父節點下。
+- **列出子筆記 (`list_children`)**: 列出某筆筆記下的所有直接子筆記。
+- **刪除筆記 (`delete_note`)**: 刪除筆記及其所有子筆記（**無法復原**）。
 - **管理屬性 (`manage_attributes`)**: 新增、修改或刪除筆記的屬性 (Attributes)。
 
 ### 安裝與設定

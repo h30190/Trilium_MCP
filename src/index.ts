@@ -31,7 +31,7 @@ const trilium = new TriliumClient(TRILIUM_ETAPI_URL, TRILIUM_ETAPI_TOKEN);
 const server = new Server(
     {
         name: "trilium-mcp",
-        version: "1.0.1",
+        version: "1.1.0",
     },
     {
         capabilities: {
