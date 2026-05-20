@@ -93,7 +93,7 @@ const batchCreateNotesSchema = z.object({
     notes: z.array(z.object({
         parentNoteId: z.string().describe("The ID of the parent note"),
         title: z.string().describe("The title of the new note"),
-        type: z.string().default("text").describe("The type of the note (e.g., text, code)"),
+        type: z.string().optional().default("text").describe("The type of the note (e.g., text, code)"),
         content: z.string().optional().describe("The initial content of the note"),
         mime: z.string().optional().describe("MIME type for the note"),
     })).describe("Array of notes to create"),

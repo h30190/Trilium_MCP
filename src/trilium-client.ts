@@ -155,7 +155,13 @@ export class TriliumClient {
     async batchCreateNotes(notes: CreateNoteParams[]): Promise<BatchOperationResult> {
         const results = await Promise.all(notes.map(async (params) => {
             try {
-                const note = await this.createNote(params);
+                // Ensure type defaults to "text" if omitted (Trilium requires it)
+                const safeParams: CreateNoteParams = {
+                    ...params,
+                    type: params.type || "text",
+                    mime: params.mime || "text/plain",
+                };
+                const note = await this.createNote(safeParams);
                 return { success: true, noteId: note.noteId, data: { title: note.title } };
             } catch (error) {
                 const msg = error instanceof Error ? error.message : String(error);
