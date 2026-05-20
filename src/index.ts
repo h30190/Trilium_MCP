@@ -82,6 +82,23 @@ const deleteNoteSchema = z.object({
     noteId: z.string().describe("The ID of the note to delete"),
 });
 
+const batchMoveNotesSchema = z.object({
+    moves: z.array(z.object({
+        noteId: z.string().describe("The ID of the note to move"),
+        parentNoteId: z.string().describe("The ID of the new parent note"),
+    })).describe("Array of moves to perform"),
+});
+
+const batchCreateNotesSchema = z.object({
+    notes: z.array(z.object({
+        parentNoteId: z.string().describe("The ID of the parent note"),
+        title: z.string().describe("The title of the new note"),
+        type: z.string().default("text").describe("The type of the note (e.g., text, code)"),
+        content: z.string().optional().describe("The initial content of the note"),
+        mime: z.string().optional().describe("MIME type for the note"),
+    })).describe("Array of notes to create"),
+});
+
 const manageAttributesSchema = z.object({
     action: z.enum(["create", "update", "delete"]).describe("The action to perform"),
     noteId: z.string().optional().describe("The ID of the note (required for create)"),
@@ -134,6 +151,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 name: "delete_note",
                 description: "Delete a note and all its children. This action is irreversible.",
                 inputSchema: zodToJsonSchema(deleteNoteSchema as any),
+            },
+            {
+                name: "batch_move_notes",
+                description: "Move multiple notes to new parents in a single batch operation.",
+                inputSchema: zodToJsonSchema(batchMoveNotesSchema as any),
+            },
+            {
+                name: "batch_create_notes",
+                description: "Create multiple notes in a single batch operation.",
+                inputSchema: zodToJsonSchema(batchCreateNotesSchema as any),
             },
             {
                 name: "manage_attributes",
@@ -223,6 +250,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
                 const { noteId } = deleteNoteSchema.parse(args);
                 await trilium.deleteNote(noteId);
                 return { content: [{ type: "text", text: `Note ${noteId} deleted successfully` }] };
+            }
+
+            case "batch_move_notes": {
+                const { moves } = batchMoveNotesSchema.parse(args);
+                const result = await trilium.batchMoveNotes(moves);
+                return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+            }
+
+            case "batch_create_notes": {
+                const { notes } = batchCreateNotesSchema.parse(args);
+                const result = await trilium.batchCreateNotes(notes);
+                return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
             }
 
             case "manage_attributes": {

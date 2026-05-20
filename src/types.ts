@@ -44,6 +44,16 @@ export interface UpdateNoteParams {
     content?: string;
 }
 
+export interface BatchOperationResult {
+    results: Array<{
+        success: boolean;
+        noteId: string;
+        error?: string;
+        data?: Record<string, unknown>;
+    }>;
+    summary: { total: number; success: number; failed: number };
+}
+
 export interface ChildNote {
     noteId: string;
     title: string;

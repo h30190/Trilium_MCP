@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { Note, NoteContent, CreateNoteParams, UpdateNoteParams, Attribute, SearchResult, ListChildrenResult, ChildNote } from './types.js';
+import { Note, NoteContent, CreateNoteParams, UpdateNoteParams, Attribute, SearchResult, ListChildrenResult, ChildNote, BatchOperationResult } from './types.js';
 
 export class TriliumClient {
     private client: AxiosInstance;
@@ -130,7 +130,43 @@ export class TriliumClient {
         await this.client.delete(`/attributes/${attributeId}`);
     }
 
-    async deleteNote(noteId: string): Promise<void> {
+   async deleteNote(noteId: string): Promise<void> {
         await this.client.delete(`/notes/${noteId}`);
+    }
+
+    async batchMoveNotes(moves: Array<{ noteId: string; parentNoteId: string }>): Promise<BatchOperationResult> {
+        const results = await Promise.all(moves.map(async (item) => {
+            try {
+                await this.moveNote(item.noteId, item.parentNoteId);
+                return { success: true, noteId: item.noteId };
+            } catch (error) {
+                const msg = error instanceof Error ? error.message : String(error);
+                return { success: false, noteId: item.noteId, error: msg };
+            }
+        }));
+
+        const successCount = results.filter(r => r.success).length;
+        return {
+            results,
+            summary: { total: results.length, success: successCount, failed: results.length - successCount }
+        };
+    }
+
+    async batchCreateNotes(notes: CreateNoteParams[]): Promise<BatchOperationResult> {
+        const results = await Promise.all(notes.map(async (params) => {
+            try {
+                const note = await this.createNote(params);
+                return { success: true, noteId: note.noteId, data: { title: note.title } };
+            } catch (error) {
+                const msg = error instanceof Error ? error.message : String(error);
+                return { success: false, noteId: params.title || '(untitled)', error: msg };
+            }
+        }));
+
+        const successCount = results.filter(r => r.success).length;
+        return {
+            results,
+            summary: { total: results.length, success: successCount, failed: results.length - successCount }
+        };
     }
 }
