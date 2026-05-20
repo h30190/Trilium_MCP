@@ -81,14 +81,29 @@ export class TriliumClient {
         return this.getNote(noteId);
     }
 
-    async moveNote(noteId: string, parentNoteId: string): Promise<Note> {
-        // In Trilium, moving a note usually means changing its parent.
-        // We can use PATCH to update parentNoteIds.
-        // WARNING: This replaces all parents. If a note is cloned, this might unclone it from other locations.
-        // For simple "move", this is acceptable.
-        await this.client.patch(`/notes/${noteId}`, {
-            parentNoteIds: [parentNoteId],
+  async moveNote(noteId: string, parentNoteId: string): Promise<Note> {
+        // In Trilium, the tree structure is managed via "branches" (parent-child relationships).
+        // PATCH /notes does NOT accept parentNoteIds — we must use the branch API:
+        //   1. POST /branches to create the new parent-child link
+        //   2. DELETE /branches/{branchId} to remove the old link(s)
+        // WARNING: This replaces all parents. If a note is cloned, this unclones it.
+
+        // Refresh note to get current parentNoteIds
+        const currentNote = await this.getNote(noteId);
+        const currentParents = currentNote.parentNoteIds ?? [];
+
+        // Step 1: Create new branch (new parent → note)
+        await this.client.post('/branches', {
+            noteId,
+            parentNoteId,
         });
+
+        // Step 2: Delete old branches (old parent → note)
+        for (const oldParent of currentParents) {
+            const branchId = `${oldParent}_${noteId}`;
+            await this.client.delete(`/branches/${branchId}`);
+        }
+
         return this.getNote(noteId);
     }
 
